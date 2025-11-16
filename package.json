@@ -1,0 +1,22 @@
+{
+  "name": "ajinoteapp",
+  "version": "1.0.0",
+  "description": "A simple encrypted note-taking CLI with REPL support.",
+  "bin": {
+    "aji-notes": "./src/app.js"
+  },
+  "main": "./src/app.js",
+  "type": "module",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "keywords": [
+    "notes",
+    "cli",
+    "encryption",
+    "repl",
+    "secure-notes"
+  ],
+  "author": "Aji",
+  "license": "MIT"
+}
