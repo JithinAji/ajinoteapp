@@ -236,13 +236,22 @@ ajinotes.defineCommand('help', {
     help: 'Show available commands and usage',
     action() {
         console.log('AJI Note App - commands:');
-        console.log('.addNote (an) <text>       Add a new note');
-        console.log('.listNotes (ln)            List all notes');
-        console.log('.deleteAll (da)            Delete all notes');
-        console.log('.deleteNote (dn) <number>  Delete a specific note by its number');
-        console.log('.setNotesFile (sn) <file>  Switch notes file (created if missing)');
-        console.log('.help                 Show this help');
-        console.log('.exit                 Exit REPL');
+        console.log('.addNote <text>           Add a new note');
+        console.log('.an <text>                Alias for .addNote');
+        console.log('.listNotes                List all notes');
+        console.log('.ln                      Alias for .listNotes');
+        console.log('.listFile                 List all note files');
+        console.log('.lf                      Alias for .listFile');
+        console.log('.deleteNote <number>      Delete a specific note by its number');
+        console.log('.deleteAll                Delete all notes');
+        console.log('.deleteFile <file>        Delete a note file (confirmation; requires password if encrypted)');
+        console.log('.df                      Alias for .deleteFile');
+        console.log('.setNotesFile <file>      Switch notes file (created if missing)');
+        console.log('.setPassword <password>   Set password for current file and encrypt existing notes');
+        console.log('.getPassword <password>   Provide session password (masked prompt if omitted)');
+        console.log('.clearPassword            Clear in-memory session password');
+        console.log('.help                     Show this help');
+        console.log('.exit                     Exit REPL');
         this.displayPrompt();
     }
 });
