@@ -76,38 +76,15 @@ function isEncryptedFile(filePath = defaultNotesPath) {
     return parsed && parsed.salt && parsed.iv && parsed.data;
 }
 
-// helper to prompt hidden input
-function promptHidden(query) {
-    return new Promise((resolve) => {
-        const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-        rl.stdoutMuted = true;
-        const _write = rl._writeToOutput;
-        rl._writeToOutput = function (stringToWrite) {
-            if (rl.stdoutMuted) rl.output.write('*');
-            else _write.call(rl, stringToWrite);
-        };
-        rl.question(query, (answer) => {
-            rl._writeToOutput = _write;
-            rl.close();
-            rl.output.write('\n');
-            resolve(answer);
-        });
-    });
-}
 
 ajinotes.defineCommand('getPassword', {
     help: 'Provide a password for encrypted notes: .getPassword <password> (or run without args to be prompted)',
     async action(pw) {
         let newPassword = (pw || '').trim();
         if (!newPassword) {
-            // prompt hidden
-            try {
-                newPassword = (await promptHidden('Password: ')).trim();
-            } catch (e) {
-                console.log('Failed to read password.');
-                this.displayPrompt();
-                return;
-            }
+            console.log('Failed to read password.');
+            this.displayPrompt();
+            return;
         }
 
         if (!newPassword) {
@@ -369,16 +346,20 @@ ajinotes.defineCommand('sn', {
 ajinotes.defineCommand('setPassword', {
     help: 'Set password for the current notes file and encrypt existing notes: .setPassword <password>',
     async action(pw) {
+        // prevent encryption of defaultNotes
+        if (selectedNotesFile === "defaultNotes") {
+            console.log("Cannot encrypt the defaultNotes file.");
+            this.displayPrompt();
+            return;
+        }
+
         let newPassword = (pw || '').trim();
         if (!newPassword) {
-            try {
-                newPassword = (await promptHidden('New password: ')).trim();
-            } catch (e) {
-                console.log('Failed to read password.');
-                this.displayPrompt();
-                return;
-            }
+            console.log('Failed to read password.');
+            this.displayPrompt();
+            return;
         }
+
 
         if (!newPassword) {
             console.log('No password provided.');
@@ -490,18 +471,9 @@ ajinotes.defineCommand('deleteFile', {
 
         // If encrypted, require password confirmation before allowing deletion
         if (isEncryptedFile(filePath)) {
-            try {
-                const supplied = (await promptHidden('Password for file: ')).trim();
-                if (!verifyPasswordForFile(filePath, supplied)) {
-                    console.log('Incorrect password. Aborting delete.');
-                    this.displayPrompt();
-                    return;
-                }
-            } catch (err) {
-                console.log('Failed to read password. Aborting.');
-                this.displayPrompt();
-                return;
-            }
+            console.log('Failed to read password. Aborting.');
+            this.displayPrompt();
+            return;
         }
 
         const answer = (await prompt(`Delete "${name}"? Type "yes" to confirm: `)).trim().toLowerCase();
