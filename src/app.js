@@ -453,11 +453,16 @@ function prompt(query) {
 }
 
 ajinotes.defineCommand('deleteFile', {
-    help: 'Delete a note file: .deleteFile <filename> (asks for confirmation; will require password if file is encrypted)',
-    async action(fileName) {
+    help: 'Delete a note file: .deleteFile <filename> [password]',
+    action(input) {
+        // manually parse the input string to extract filename and password
+        const parts = (input || '').trim().split(/\s+/);
+        const fileName = parts[0];
+        const filePassword = parts[1];
+
         const name = (fileName || '').trim();
         if (!name) {
-            console.log('Provide filename. Usage: .deleteFile <filename>');
+            console.log('Provide filename. Usage: .deleteFile <filename> [password]');
             this.displayPrompt();
             return;
         }
@@ -469,18 +474,19 @@ ajinotes.defineCommand('deleteFile', {
             return;
         }
 
-        // If encrypted, require password confirmation before allowing deletion
+        // If encrypted, require password
         if (isEncryptedFile(filePath)) {
-            console.log('Failed to read password. Aborting.');
-            this.displayPrompt();
-            return;
-        }
-
-        const answer = (await prompt(`Delete "${name}"? Type "yes" to confirm: `)).trim().toLowerCase();
-        if (answer !== 'yes') {
-            console.log('Aborted.');
-            this.displayPrompt();
-            return;
+            if (!filePassword || !filePassword.trim()) {
+                console.log('File is encrypted. Provide password: .deleteFile ' + name + ' <password>');
+                this.displayPrompt();
+                return;
+            }
+            // Verify password
+            if (!verifyPasswordForFile(filePath, filePassword.trim())) {
+                console.log('Incorrect password.');
+                this.displayPrompt();
+                return;
+            }
         }
 
         try {
@@ -502,11 +508,13 @@ ajinotes.defineCommand('deleteFile', {
     }
 });
 
-
 ajinotes.defineCommand('df', {
     help: 'Alias for .deleteFile',
-    action(fileName) { this.commands.deleteFile.action.call(this, fileName); }
+    action(input) {
+        this.commands.deleteFile.action.call(this, input);
+    }
 });
+
 
 ajinotes.on('exit', () => {
     console.log('Exiting AJI Note App REPL. Goodbye!');

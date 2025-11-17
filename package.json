@@ -1,6 +1,6 @@
 {
   "name": "ajinoteapp",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A simple encrypted note-taking CLI with REPL support.",
   "bin": {
     "aji-notes": "./src/app.js"
